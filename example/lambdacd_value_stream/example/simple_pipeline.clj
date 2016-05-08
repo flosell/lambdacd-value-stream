@@ -10,7 +10,12 @@
             [lambdacd-git.core :as git]
             [lambdacd.runners :as runners]
             [clojure.java.io :as io]
-            [lambdacd.util :as utils]))
+            [lambdacd.util :as utils]
+            [lambdacd-value-stream.core :as core]
+            [clojure.string :as s]
+            [lambdacd.steps.support :as support]))
+
+; ================ Some build steps ================
 
 (def lambdacd-repo "git@github.com:flosell/lambdacd")
 (def lambdacd-git-repo "git@github.com:flosell/lambdacd-git")
@@ -30,13 +35,34 @@
   (shell/bash ctx (:cwd args) "./go test"))
 
 (defn test-lambdacd-git [args ctx]
-  (shell/bash ctx (:cwd args) "./go test"))
+  (shell/bash ctx (:cwd args) {"LAMBDACD_VERSION" (get-in args [:upstream-result :lambdacd-release-version])}
+              "./go test"))
+
+(defn find-release-version [args ctx]
+  (let [cwd             (:cwd args)
+        file            (->> (io/file cwd "target")
+                             (file-seq)
+                             (filter #(.contains (.getName %) "-SNAPSHOT.jar"))
+                             (first))
+        release-version (-> file
+                            (.getName)
+                            (s/split #"-")
+                            (second))]
+    {:status                   :success
+     :lambdacd-release-version (str release-version "-SNAPSHOT")}))
 
 (defn release-lambdacd [args ctx]
-  (shell/bash ctx (:cwd args) "./go release-local"))
+  (support/chaining args ctx
+                    (shell/bash ctx (:cwd args)
+                                "npm install"
+                                "./go release-local")
+                    (find-release-version args ctx)))
+
 
 (defn wait-for-lambdacd-pipeline [args ctx]
   (value-stream/wait-for-pipline-success :lambdacd ctx))
+
+; ================ Two Pipelines ================
 
 (def lambdacd-pipeline-structure
   `((either
@@ -50,21 +76,27 @@
 (def lambdacd-git-pipeline-structure
   `((either
       wait-for-manual-trigger
+      ; wait for the other pipeline to be finished:
       wait-for-lambdacd-pipeline)
      (with-workspace
        clone-lambdacd-git
        test-lambdacd-git)))
+
+; ================ Some wiring ================
 
 (defn -main [& args]
   (let [home-dir              (utils/create-temp-dir)
         lambdacd-pipeline     (lambdacd/assemble-pipeline lambdacd-pipeline-structure {:home-dir home-dir})
         lambdacd-git-pipeline (lambdacd/assemble-pipeline lambdacd-git-pipeline-structure {:home-dir (utils/create-temp-dir)})
         lambdacd-ui           (ui/ui-for lambdacd-pipeline)
-        lambdacd-git-ui       (ui/ui-for lambdacd-git-pipeline)
-        ]
+        lambdacd-git-ui       (ui/ui-for lambdacd-git-pipeline)]
     (git/init-ssh!)
+    (core/initialize-value-stream {:lambdacd     lambdacd-pipeline
+                                   :lambdacd-git lambdacd-git-pipeline})
     (runners/start-one-run-after-another lambdacd-pipeline)
-    (runners/start-one-run-after-another lambdacd-git-pipeline)
+    ; runners/new-run-after-first-step-finished makes more sense if we want to trigger downstream pipelines,
+    ; otherwise we might miss events
+    (runners/start-new-run-after-first-step-finished lambdacd-git-pipeline)
     (ring-server/serve (routes
                          (context "/lambdacd" []
                            lambdacd-ui)

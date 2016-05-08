@@ -10,7 +10,6 @@
   :test-paths ["test" "example"]
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [lambdacd ~lambdacd-version]]
-  :profiles {:dev {:main         lambdacd-git.example.simple-pipeline
-                   :dependencies [[compojure "1.1.8"]
+  :profiles {:dev {:dependencies [[compojure "1.1.8"]
                                   [lambdacd-git "0.1.2"]
                                   [ring-server "0.4.0"]]}})
