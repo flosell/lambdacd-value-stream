@@ -2,7 +2,7 @@
                         (System/getenv "LAMBDACD_VERSION")
                         "0.9.0"))
 
-(defproject lambdacd-value-stream "0.1.0-SNAPSHOT"
+(defproject lambdacd-value-stream "0.1.0"
   :description "A library that adds upstream and downstream triggers to LambdaCD"
   :url "https://github.com/flosell/lambdacd-value-stream"
   :license {:name "Apache License, version 2.0"
