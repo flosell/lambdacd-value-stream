@@ -4,7 +4,7 @@ A library that adds upstream and downstream triggers to LambdaCD
 
 ## Status
 
-[![Build Status](https://travis-ci.org/flosell/lambdacd-git.svg)](https://travis-ci.org/flosell/lambdacd-git)
+[![Build Status](https://travis-ci.org/flosell/lambdacd-value-stream.svg)](https://travis-ci.org/flosell/lambdacd-value-stream)
 
 [![Clojars Project](https://img.shields.io/clojars/v/lambdacd-value-stream.svg)](https://clojars.org/lambdacd-value-stream)
 
