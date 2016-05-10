@@ -13,7 +13,7 @@ goal_run() {
 goal_push() {
   goal_test && git push
 }
-release() {
+goal_release() {
   test && lein release && scripts/github-release.sh
 }
 
