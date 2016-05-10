@@ -1,6 +1,6 @@
 # lambdacd-value-stream
 
-A library that adds upstrean and downstrem triggers to LambdaCD
+A library that adds upstream and downstream triggers to LambdaCD
 
 ## When to use this
 
