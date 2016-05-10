@@ -2,6 +2,13 @@
 
 A library that adds upstream and downstream triggers to LambdaCD
 
+## Status
+
+[![Build Status](https://travis-ci.org/flosell/lambdacd-git.svg)](https://travis-ci.org/flosell/lambdacd-git)
+
+[![Clojars Project](https://img.shields.io/clojars/v/lambdacd-value-stream.svg)](https://clojars.org/lambdacd-value-stream)
+
+
 ## When to use this
 
 When you want to split your pipeline up into multiple, smaller pipelines
