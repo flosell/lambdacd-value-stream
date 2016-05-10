@@ -14,7 +14,7 @@ goal_push() {
   goal_test && git push
 }
 goal_release() {
-  test && lein release && scripts/github-release.sh
+  goal_test && lein release && scripts/github-release.sh
 }
 
 if type -t "goal_$1" &>/dev/null; then
