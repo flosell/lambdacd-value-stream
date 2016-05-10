@@ -13,6 +13,9 @@ goal_run() {
 goal_push() {
   goal_test && git push
 }
+release() {
+  test && lein release && scripts/github-release.sh
+}
 
 if type -t "goal_$1" &>/dev/null; then
   goal_$1 ${@:2}
@@ -21,6 +24,7 @@ else
 goal:
     test      -- run tests
     push      -- run all tests and push current state
+    release   -- release current version
     run       -- run example pipeline"
   exit 1
 fi
