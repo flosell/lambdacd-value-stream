@@ -21,8 +21,8 @@ and trigger one pipeline from another.
 (let [foo-pipeline (lambdacd/assemble-pipeline foo-structure foo-config)
       bar-pipeline (lambdacd/assemble-pipeline bar-structure bar-config)]
     ; ...
-    (core/initialize-value-stream {:foo foo-pipeline
-                                   :bar bar-pipeline})
+    (vaule-stream/initialize-value-stream {:foo foo-pipeline
+                                           :bar bar-pipeline})
     ; ...
     )
 ```
