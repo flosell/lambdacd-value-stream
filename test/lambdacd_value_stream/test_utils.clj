@@ -35,7 +35,7 @@
     c ([result] result)
     (async/timeout timeout) (throw (Exception. "timeout!"))))
 
-  (defn slurp-chan-with-size [size ch]
+(defn slurp-chan-with-size [size ch]
   (read-channel-or-time-out
     (async/go-loop [collector []]
       (if-let [item (async/<! ch)]
@@ -43,3 +43,7 @@
           (if (= size (count new-collector))
             new-collector
             (recur new-collector)))))))
+
+(defn map-containing [expected m]
+  (and (every? (set (keys m)) (keys expected))
+       (every? #(= (m %)(expected %)) (keys expected))))
