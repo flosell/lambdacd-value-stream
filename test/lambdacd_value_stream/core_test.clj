@@ -4,7 +4,7 @@
             [lambdacd.state.internal.pipeline-state-updater :as pipeline-state]
             [clojure.core.async :as async]
             [lambdacd.core :as lambdacd-core]
-            [lambdacd-value-stream.test_utils :refer [some-ctx-with some-ctx read-channel-or-time-out slurp-chan-with-size map-containing create-temp-dir]]
+            [lambdacd-value-stream.test_utils :refer [some-ctx-with read-channel-or-time-out slurp-chan-with-size map-containing create-temp-dir]]
             [lambdacd.event-bus :as event-bus]))
 
 ; SYNTACTIC SUGAR FIRST. SCROLL DOWN FOR TESTS

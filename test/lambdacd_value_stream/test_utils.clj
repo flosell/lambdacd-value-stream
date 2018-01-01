@@ -1,8 +1,7 @@
 (ns lambdacd-value-stream.test_utils
   (:require [lambdacd.internal.default-pipeline-state :as default-pipeline-state]
             [lambdacd.event-bus :as event-bus]
-            [clojure.core.async :as async]
-            [lambdacd.util :as utils])
+            [clojure.core.async :as async])
   (:import (java.nio.file Files)
            (java.nio.file.attribute FileAttribute)))
 (defn create-temp-dir []
@@ -29,9 +28,6 @@
 (defn some-ctx-with [& args]
   (add-pipeline-state-component
     (apply assoc (some-ctx-template) args)))
-(defn some-ctx [& args]
-  (add-pipeline-state-component
-    (some-ctx-template)))
 
 (defn read-channel-or-time-out [c & {:keys [timeout]
                                      :or             {timeout 10000}}]
