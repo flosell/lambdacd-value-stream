@@ -10,7 +10,7 @@
             [lambdacd-git.core :as git]
             [lambdacd.runners :as runners]
             [clojure.java.io :as io]
-            [lambdacd.util :as utils]
+            [lambdacd-value-stream.test_utils :as utils]
             [lambdacd-value-stream.core :as core]
             [clojure.string :as s]
             [lambdacd.steps.support :as support]))
