@@ -1,10 +1,10 @@
 (ns lambdacd-value-stream.core-test
   (:require [clojure.test :refer :all]
             [lambdacd-value-stream.core :as core]
-            [lambdacd.internal.pipeline-state :as pipeline-state]
+            [lambdacd.state.internal.pipeline-state-updater :as pipeline-state]
             [clojure.core.async :as async]
             [lambdacd.core :as lambdacd-core]
-            [lambdacd-value-stream.test_utils :refer [some-ctx-with some-ctx read-channel-or-time-out slurp-chan-with-size map-containing]]
+            [lambdacd-value-stream.test_utils :refer [some-ctx-with some-ctx read-channel-or-time-out slurp-chan-with-size map-containing create-temp-dir]]
             [lambdacd.event-bus :as event-bus]))
 
 ; SYNTACTIC SUGAR FIRST. SCROLL DOWN FOR TESTS
@@ -21,9 +21,10 @@
 (defn- init-state []
   (let [is-killed           (atom false)
         ctx                 (some-ctx-with :is-killed is-killed
-                                           :config {:value-stream {:pipeline-id :some-pipeline-id}})
+                                           :config {:value-stream {:pipeline-id :some-pipeline-id}
+                                                    :home-dir     (create-temp-dir)})
         step-status-channel (status-updates-channel ctx)]
-    (pipeline-state/start-pipeline-state-updater (:pipeline-state-component ctx) ctx)
+    (pipeline-state/start-pipeline-state-updater ctx)
     (atom {:ctx                 ctx
            :is-killed           is-killed
            :step-status-channel step-status-channel})))
@@ -81,13 +82,13 @@
 (defn- notify-about-pipeline-success [state & {:keys [pipeline-id build-number final-result] :or {pipeline-id  :some-pipeline
                                                                                                   build-number 1
                                                                                                   final-result {}}}]
-  (event-bus/publish (:ctx @state) ::core/pipeline-success {:pipeline-id  pipeline-id
+  (event-bus/publish!! (:ctx @state) ::core/pipeline-success {:pipeline-id  pipeline-id
                                                             :build-number build-number
                                                             :final-result final-result})
   state)
 
 (defn notify-about-upstream-pipeline-trigger [state & {:as partial-event}]
-  (event-bus/publish (:ctx @state) ::core/upstream-trigger (merge
+  (event-bus/publish!! (:ctx @state) ::core/upstream-trigger (merge
                                                              {:pipeline-to-trigger   :some-pipeline-id
                                                               :upstream-args         {:some :args}
                                                               :upstream-build-number :some-build-number
@@ -106,7 +107,7 @@
      step-2))
 
 (defn- mock-assemble-pipeline [pipeline-structure config]
-  {:context            (some-ctx-with :config config)
+  {:context            (some-ctx-with :config (assoc config :home-dir (create-temp-dir)))
    :pipeline-structure pipeline-structure})
 
 
@@ -170,7 +171,8 @@
   (testing "that it publishes an event that gets broadcasted by initialize-value-stream"
     (let [ctx        (some-ctx-with :build-number :some-build-number
                                     :step-id :some-step-id
-                                    :config {:value-stream {:pipeline-id :some-upstream-pipeline-id}})
+                                    :config {:value-stream {:pipeline-id :some-upstream-pipeline-id}
+                                             :home-dir (create-temp-dir)})
           trigger-ch (-> ctx
                          (event-bus/subscribe ::core/trigger-downstream)
                          (event-bus/only-payload))]
@@ -206,13 +208,13 @@
                                                               (event-bus/subscribe ::core/pipeline-success)
                                                               (event-bus/only-payload))]
                    (Thread/sleep 500)                       ; HACK to make sure everything is properly subscribed and tapped
-                   (event-bus/publish (:context pipeline-one) :step-finished {:step-id      [1]
+                   (event-bus/publish!! (:context pipeline-one) :step-finished {:step-id      [1]
                                                                               :build-number :some-other-build-number
                                                                               :final-result {:shouldnt :matter}})
-                   (event-bus/publish (:context pipeline-one) :step-finished {:step-id      [2]
+                   (event-bus/publish!! (:context pipeline-one) :step-finished {:step-id      [2]
                                                                               :build-number :some-failing-build
                                                                               :final-result {:status :failure}})
-                   (event-bus/publish (:context pipeline-one) :step-finished {:step-id      [2]
+                   (event-bus/publish!! (:context pipeline-one) :step-finished {:step-id      [2]
                                                                               :build-number :some-build-number
                                                                               :final-result {:status :success}})
                    (is (= [{:pipeline-id  :one
@@ -229,6 +231,6 @@
                                                               (event-bus/subscribe ::core/upstream-trigger)
                                                               (event-bus/only-payload))]
                    (Thread/sleep 500)                       ; HACK to make sure everything is properly subscribed and tapped
-                   (event-bus/publish (:context pipeline-one) ::core/trigger-downstream {:some :info})
+                   (event-bus/publish!! (:context pipeline-one) ::core/trigger-downstream {:some :info})
                    (is (= [{:some :info}] (slurp-chan-with-size 1 pipeline-one-success-event-channel)))
                    (is (= [{:some :info}] (slurp-chan-with-size 1 pipeline-two-success-event-channel))))))))))

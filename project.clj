@@ -1,6 +1,6 @@
 (def lambdacd-version (or
                         (System/getenv "LAMBDACD_VERSION")
-                        "0.9.0"))
+                        "0.13.5"))
 
 (defproject lambdacd-value-stream "0.2.0-SNAPSHOT"
   :description "A library that adds upstream and downstream triggers to LambdaCD"
@@ -13,5 +13,5 @@
   :deploy-repositories [["clojars" {:creds :gpg}]
                         ["releases" :clojars]]
   :profiles {:dev {:dependencies [[compojure "1.1.8"]
-                                  [lambdacd-git "0.1.2"]
+                                  [lambdacd-git "0.3.0"]
                                   [ring-server "0.4.0"]]}})

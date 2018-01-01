@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+* Bump default LambdaCD dependency to 0.13.5
+
 ## 0.2.0
 
 * Improvements:

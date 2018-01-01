@@ -70,7 +70,7 @@
       result)))
 
 (defn trigger-downstream-pipeline [pipeline-to-trigger args ctx]
-  (event-bus/publish ctx ::trigger-downstream {:pipeline-to-trigger pipeline-to-trigger
+  (event-bus/publish!! ctx ::trigger-downstream {:pipeline-to-trigger pipeline-to-trigger
                                                :upstream-pipeline-id (get-in ctx [:config :value-stream :pipeline-id])
                                                :upstream-args args
                                                :upstream-build-number (:build-number ctx)

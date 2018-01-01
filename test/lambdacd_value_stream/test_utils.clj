@@ -2,10 +2,14 @@
   (:require [lambdacd.internal.default-pipeline-state :as default-pipeline-state]
             [lambdacd.event-bus :as event-bus]
             [clojure.core.async :as async]
-            [lambdacd.util :as utils]))
+            [lambdacd.util :as utils])
+  (:import (java.nio.file Files)
+           (java.nio.file.attribute FileAttribute)))
+(defn create-temp-dir []
+  (str (Files/createTempDirectory "lambdacd-value-stream-tests" (into-array FileAttribute []))))
 
 (defn- some-ctx-template []
-  (let [config {:home-dir (utils/create-temp-dir)}]
+  (let [config {:home-dir (create-temp-dir)}]
     (-> {:initial-pipeline-state   {} ;; only used to assemble pipeline-state, not in real life
          :step-id                  [42]
          :result-channel           (async/chan (async/dropping-buffer 100))
@@ -19,7 +23,7 @@
 (defn- add-pipeline-state-component [template]
   (if (nil? (:pipeline-state-component template))
     (assoc template :pipeline-state-component
-                    (default-pipeline-state/new-default-pipeline-state template :initial-state-for-testing (:initial-pipeline-state template)))
+                    (default-pipeline-state/new-default-pipeline-state (:config template) :initial-state-for-testing (:initial-pipeline-state template)))
     template))
 
 (defn some-ctx-with [& args]
