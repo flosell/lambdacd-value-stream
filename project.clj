@@ -13,5 +13,5 @@
   :deploy-repositories [["clojars" {:creds :gpg}]
                         ["releases" :clojars]]
   :profiles {:dev {:dependencies [[compojure "1.1.8"]
-                                  [lambdacd-git "0.3.0"]
+                                  [lambdacd-git "0.4.0"]
                                   [ring-server "0.4.0"]]}})
