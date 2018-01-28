@@ -3,9 +3,9 @@
             [lambdacd-value-stream.core :as core]
             [lambdacd.state.internal.pipeline-state-updater :as pipeline-state]
             [clojure.core.async :as async]
-            [lambdacd.core :as lambdacd-core]
             [lambdacd-value-stream.test_utils :refer [some-ctx-with read-channel-or-time-out slurp-chan-with-size map-containing create-temp-dir]]
-            [lambdacd.event-bus :as event-bus]))
+            [lambdacd.event-bus :as event-bus]
+            [lambdacd.execution.core :as execution-core]))
 
 ; SYNTACTIC SUGAR FIRST. SCROLL DOWN FOR TESTS
 
@@ -41,8 +41,8 @@
 
 (defn start-wait-for-pipeline-success [state & {:keys [pipeline-to-wait-for] :or {pipeline-to-wait-for :some-pipeline}}]
   (let [wait-for-result-channel (async/go
-                                  (let [execute-step-result (lambdacd-core/execute-step {} (:ctx @state)
-                                                                                        (fn [args ctx]
+                                  (let [execute-step-result (execution-core/execute-step {} (:ctx @state)
+                                                                                         (fn [args ctx]
                                                                                           (core/wait-for-pipline-success pipeline-to-wait-for ctx)))]
                                     (first (vals (:outputs execute-step-result)))))]
     (swap! state #(assoc % :result-channel wait-for-result-channel))
@@ -51,8 +51,8 @@
 
 (defn start-wait-for-upstream-trigger [state]
   (let [wait-for-result-channel (async/go
-                                  (let [execute-step-result (lambdacd-core/execute-step {} (:ctx @state)
-                                                                                        (fn [args ctx]
+                                  (let [execute-step-result (execution-core/execute-step {} (:ctx @state)
+                                                                                         (fn [args ctx]
                                                                                           (core/wait-for-upstream-trigger args ctx)))]
                                     (first (vals (:outputs execute-step-result)))))]
     (swap! state #(assoc % :result-channel wait-for-result-channel))
