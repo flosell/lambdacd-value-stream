@@ -1,7 +1,7 @@
 (ns lambdacd-value-stream.core
-  (:require [lambdacd.steps.support :as support]
-            [clojure.core.async :as async]
-            [lambdacd.event-bus :as event-bus]))
+  (:require [clojure.core.async :as async]
+            [lambdacd.event-bus :as event-bus]
+            [lambdacd.stepsupport.output :as output]))
 
 (defn- kill-switch->ch [ctx]
   (let [ch       (async/chan)
@@ -54,7 +54,7 @@
     result))
 
 (defn wait-for-pipline-success [pipeline-id ctx]
-  (support/capture-output ctx
+  (output/capture-output ctx
     (println "Waiting for upstream build" pipeline-id "to finish successfully")
     (let [result (wait-for-pipeline-event ctx ::pipeline-success (partial filter-for-pipeline-id pipeline-id) pipeline-success-event->step-result)]
       (if (= :success (:status result))
@@ -62,7 +62,7 @@
       result)))
 
 (defn wait-for-upstream-trigger [_ ctx]
-  (support/capture-output ctx
+  (output/capture-output ctx
     (println "Waiting to be triggered by upstream pipeline...")
     (let [result (wait-for-pipeline-event ctx ::upstream-trigger (partial filter-for-triggered-pipeline ctx) pipeline-trigger-event->step-result)]
       (if (= :success (:status result))

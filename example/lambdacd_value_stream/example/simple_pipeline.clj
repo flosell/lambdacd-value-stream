@@ -13,7 +13,7 @@
             [lambdacd-value-stream.test_utils :as utils]
             [lambdacd-value-stream.core :as core]
             [clojure.string :as s]
-            [lambdacd.steps.support :as support]))
+            [lambdacd.stepsupport.chaining :as chaining]))
 
 ; ================ Some build steps ================
 
@@ -60,11 +60,11 @@
      :global {:lambdacd-release-version (str release-version "-SNAPSHOT")}}))
 
 (defn release-lambdacd [args ctx]
-  (support/chaining args ctx
-                    (shell/bash ctx (:cwd args)
-                                "npm install"
-                                "./go release-local")
-                    (find-release-version args ctx)))
+  (chaining/chaining args ctx
+                     (shell/bash ctx (:cwd args)
+                                 "npm install"
+                                 "./go release-local")
+                     (find-release-version args ctx)))
 
 (defn trigger-downstream [args ctx]
   (value-stream/trigger-downstream-pipeline :lambdacd-cctray args ctx))
