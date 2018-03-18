@@ -6,7 +6,7 @@
             [lambdacd.core :as lambdacd]
             [lambdacd-value-stream.core :as value-stream]
             [ring.server.standalone :as ring-server]
-            [lambdacd.ui.ui-server :as ui]
+            [lambdacd.ui.core :as ui]
             [lambdacd-git.core :as git]
             [lambdacd.runners :as runners]
             [clojure.java.io :as io]
