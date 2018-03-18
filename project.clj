@@ -6,7 +6,7 @@
                               (System/getenv "CLOJURE_VERSION")
                               "1.7.0"))
 
-(defproject lambdacd-value-stream "0.2.0"
+(defproject lambdacd-value-stream "0.2.1-SNAPSHOT"
   :description "A library that adds upstream and downstream triggers to LambdaCD"
   :url "https://github.com/flosell/lambdacd-value-stream"
   :license {:name "Apache License, version 2.0"
